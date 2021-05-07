@@ -1716,6 +1716,7 @@ function getUserCardData($user, &$userCardInfo)
     $userCardInfo['Permissions'] = $userInfo['Permissions'];
     $userCardInfo['Motto'] = htmlspecialchars($userInfo['Motto']);
     $userCardInfo['Rank'] = getUserRank($user);
+    $userCardInfo['Untracked'] = $userInfo['Untracked'];
     $userCardInfo['LastActivity'] = $userInfo['LastLogin'];
     $userCardInfo['MemberSince'] = $userInfo['Created'];
 }
