@@ -29,6 +29,7 @@ $adminAssignable = [
     Role::MODERATOR,
     Role::NEWS_MANAGER,
     Role::PLAY_TESTER,
+    Role::PLAYTEST_MANAGER,
     Role::QUALITY_ASSURANCE,
     Role::TICKET_MANAGER,
     Role::WRITER,
@@ -169,6 +170,12 @@ return [
     ],
     [
         'name' => Role::EVENT_MANAGER,
+        'display' => 3,
+        'staff' => true,
+        'legacy_role' => Permissions::Registered,
+    ],
+    [
+        'name' => Role::PLAYTEST_MANAGER,
         'display' => 3,
         'staff' => true,
         'legacy_role' => Permissions::Registered,

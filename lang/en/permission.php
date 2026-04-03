@@ -32,6 +32,7 @@ return [
         Role::MANUAL_UNLOCKER => __('Manual Unlocker'),
         Role::NEWS_MANAGER => __('News Manager'),
         Role::EVENT_MANAGER => __('Event Manager'),
+        Role::PLAYTEST_MANAGER => __('Playtest Manager'),
         Role::CHEAT_INVESTIGATOR => __('Cheat Investigator'),
 
         // vanity roles assigned by root

@@ -81,7 +81,6 @@ export const UserRole = {
     TICKET_MANAGER: 'ticket-manager',
     NEWS_MANAGER: 'news-manager',
     EVENT_MANAGER: 'event-manager',
-    MANUAL_UNLOCKER: 'manual-unlocker',
     CHEAT_INVESTIGATOR: 'cheat-investigator',
     FOUNDER: 'founder',
     ARCHITECT: 'architect',
