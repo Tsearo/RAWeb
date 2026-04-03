@@ -146,7 +146,7 @@ class UserPermissionsData extends Data
             updateGameSet: Lazy::create(fn () => $user && $gameSet ? $user->can('update', $gameSet) : false),
             updateMotto: Lazy::create(fn () => $user ? $user->can('updateMotto', $user) : false),
             viewAchievementLogic: Lazy::create(fn () => $user && $triggerable instanceof Achievement
-                ? $user->can('viewLogic', $triggerable)
+                ? $user->canany(['manage', 'viewLogic'], $triggerable)
                 : false
             ),
             viewAnyAchievementSetClaim: Lazy::create(fn () => $user ? $user->can('viewAny', AchievementSetClaim::class) : false),

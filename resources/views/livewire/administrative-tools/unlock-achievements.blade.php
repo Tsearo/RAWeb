@@ -8,6 +8,8 @@ use App\Platform\Jobs\UnlockPlayerAchievementJob;
 use Filament\Forms;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
@@ -20,6 +22,9 @@ new class extends Component implements HasForms {
     public ?string $achievementIdsCsv = null;
     public ?string $selectedMode = null;
 
+    public ?array $usernamesSelect = [];
+    public ?array $achievementIdsSelect = [];
+
     public array $validUserIds = [];
     public array $validUsernames = [];
     public array $missingUsernames = [];
@@ -28,28 +33,52 @@ new class extends Component implements HasForms {
     public array $missingAchievementIds = [];
 
     public $loadedAchievements = null;
+
+    public function rendering(): void
+    {
+        if ($this->loadedAchievements && $this->loadedAchievements->isNotEmpty()) {
+            $this->loadedAchievements->loadMissing(['game.system']);
+        }
+    }
+
     public function submit(): void
     {
-        // Validate.
         $this->form->getState();
 
-        // Parse Users
-        $usernames = array_filter(array_unique(array_map('trim', preg_split('/[\s,]+/', $this->usernamesCsv))));
-        $users = User::whereIn('username', $usernames)->get();
-        $foundUsernamesLower = $users->pluck('username')->map(fn($u) => strtolower((string) $u))->toArray();
+        $usernames = [];
+        if (!empty($this->usernamesSelect)) {
+            $users = User::whereIn('id', $this->usernamesSelect)->get();
+            $usernames = $users->pluck('username')->toArray();
+            $this->missingUsernames = [];
+            $this->validUserIds = $users->pluck('id')->toArray();
+            $this->validUsernames = $usernames;
+        } else {
+            $usernames = array_filter(array_unique(array_map('trim', preg_split('/[\s,]+/', (string) $this->usernamesCsv))));
+            $users = User::whereIn('username', $usernames)->get();
+            $foundUsernamesLower = $users->pluck('username')->map(fn($u) => strtolower((string) $u))->toArray();
 
-        $this->missingUsernames = array_values(array_filter($usernames, fn($u) => !in_array(strtolower((string) $u), $foundUsernamesLower)));
-        $this->validUserIds = $users->pluck('id')->toArray();
-        $this->validUsernames = $users->pluck('username')->toArray();
+            $this->missingUsernames = array_values(array_filter($usernames, fn($u) => !in_array(strtolower((string) $u), $foundUsernamesLower)));
+            $this->validUserIds = $users->pluck('id')->toArray();
+            $this->validUsernames = $users->pluck('username')->toArray();
+        }
 
-        // Parse Achievements (eager load related game.system and cache)
-        $csvIds = (new ParseIdsFromCsvAction())->execute($this->achievementIdsCsv);
-        $this->loadedAchievements = Achievement::with(['game.system'])->whereIn('id', $csvIds)->get();
-        $achievements = $this->loadedAchievements;
-        $foundAchievementIds = $achievements->pluck('id')->toArray();
+        if (!empty($this->achievementIdsSelect)) {
+            $csvIds = array_map('intval', $this->achievementIdsSelect);
+            $this->loadedAchievements = Achievement::with(['game.system'])->whereIn('id', $csvIds)->get();
+            $achievements = $this->loadedAchievements;
+            $foundAchievementIds = $achievements->pluck('id')->toArray();
 
-        $this->missingAchievementIds = array_values(array_diff($csvIds, $foundAchievementIds));
-        $this->validAchievementIds = $foundAchievementIds;
+            $this->missingAchievementIds = array_values(array_diff($csvIds, $foundAchievementIds));
+            $this->validAchievementIds = $foundAchievementIds;
+        } else {
+            $csvIds = (new ParseIdsFromCsvAction())->execute($this->achievementIdsCsv);
+            $this->loadedAchievements = Achievement::with(['game.system'])->whereIn('id', $csvIds)->get();
+            $achievements = $this->loadedAchievements;
+            $foundAchievementIds = $achievements->pluck('id')->toArray();
+
+            $this->missingAchievementIds = array_values(array_diff($csvIds, $foundAchievementIds));
+            $this->validAchievementIds = $foundAchievementIds;
+        }
 
         $errors = [];
 
@@ -67,6 +96,36 @@ new class extends Component implements HasForms {
             $errors['achievementIdsCsv'] = 'You can only process up to 100 achievements at a time. Please reduce the number of achievements.';
         } elseif (!empty($this->missingAchievementIds)) {
             $errors['achievementIdsCsv'] = 'Invalid Achievements: ' . implode(', ', $this->missingAchievementIds);
+        } else {
+            $setIds = \Illuminate\Support\Facades\DB::table('achievement_set_achievements')
+                ->whereIn('achievement_id', $achievements->pluck('id'))
+                ->pluck('achievement_set_id')
+                ->unique();
+
+            $links = \Illuminate\Support\Facades\DB::table('game_achievement_sets')
+                ->whereIn('achievement_set_id', $setIds)
+                ->get();
+
+            $baseGameIds = collect();
+            foreach ($setIds as $setId) {
+                $setLinks = $links->where('achievement_set_id', $setId);
+                $coreLink = $setLinks->firstWhere('type', \App\Platform\Enums\AchievementSetType::Core->value);
+                $bonusLink = $setLinks->firstWhere('type', \App\Platform\Enums\AchievementSetType::Bonus->value);
+                $specialtyLink = $setLinks->firstWhere('type', \App\Platform\Enums\AchievementSetType::Specialty->value);
+                $exclusiveLink = $setLinks->firstWhere('type', \App\Platform\Enums\AchievementSetType::Exclusive->value);
+
+                // Specialty and Bonus sets fall back to the base game ID.
+                // Exclusive sets remain isolated by falling back to their own core link's game ID.
+                $baseGameId = $bonusLink?->game_id ?? $specialtyLink?->game_id ?? $coreLink?->game_id;
+                
+                if ($baseGameId) {
+                    $baseGameIds->push($baseGameId);
+                }
+            }
+
+            if ($baseGameIds->unique()->count() > 1) {
+                $errors['achievementIdsCsv'] = 'Warning: Achievement IDs belong to different (base) games.';
+            }
         }
 
         $hasUnpromoted = $achievements->contains(fn($a) => !$a->is_promoted);
@@ -115,6 +174,8 @@ new class extends Component implements HasForms {
         $this->form->fill();
         $this->usernamesCsv = null;
         $this->achievementIdsCsv = null;
+        $this->usernamesSelect = [];
+        $this->achievementIdsSelect = [];
         $this->selectedMode = null;
         $this->loadedAchievements = collect();
         
@@ -126,19 +187,78 @@ new class extends Component implements HasForms {
         return $schema
             ->schema([
                 Forms\Components\Textarea::make('usernamesCsv')
-                    ->label('Usernames')
+                    ->label('Usernames CSV')
                     ->placeholder("User1, User2, User3 or User1 User2 User3")
                     ->helperText("Paste a comma or space-separated list of usernames.")
+                    ->disabled(fn (Get $get): bool => filled($get('usernamesSelect')))
+                    ->live(debounce: 200)
                     ->rows(2)
-                    ->required(),
+                    ->requiredWithout('usernamesSelect')
+                    ->afterStateUpdated(fn (Set $set) => $set('usernamesSelect', null)),
+
+                Forms\Components\Select::make('usernamesSelect')
+                    ->label('Usernames')
+                    ->requiredWithout('usernamesCsv')
+                    ->multiple()
+                    ->getOptionLabelsUsing(function (array $values): array {
+                        return User::whereIn('id', $values)->pluck('username', 'id')->toArray();
+                    })
+                    ->searchable()
+                    ->getSearchResultsUsing(function (string $search): array {
+                        return User::search($search)
+                            ->withTrashed()
+                            ->take(50)
+                            ->get()
+                            ->pluck('username', 'id')
+                            ->toArray();
+                    })
+                    ->disabled(fn (Get $get): bool => filled($get('usernamesCsv')))
+                    ->live()
+                    ->afterStateUpdated(fn (Set $set) => $set('usernamesCsv', null))
+                    ->helperText('... or search and select users to add.'),
 
                 Forms\Components\Textarea::make('achievementIdsCsv')
-                    ->label('Achievement IDs')
+                    ->label('Achievement IDs CSV')
                     ->placeholder("9, 17, 25 or 9 17 25")
                     ->helperText("Paste a comma or space-separated list of Achievement IDs.")
                     ->rows(2)
-                    ->required()
-                    ->rules(['regex:/^\d+([\s,]+\d+)*$/']),
+                    ->disabled(fn (Get $get): bool => filled($get('achievementIdsSelect')))
+                    ->live(debounce: 200)
+                    ->requiredWithout('achievementIdsSelect')
+                    ->rules(['regex:/^\d+([\s,]+\d+)*$/'])
+                    ->afterStateUpdated(fn (Set $set) => $set('achievementIdsSelect', null)),
+
+                Forms\Components\Select::make('achievementIdsSelect')
+                    ->label('Achievement IDs')
+                    ->placeholder("9, 17, 25 or 9 17 25")
+                    ->helperText("Paste a comma or space-separated list of Achievement IDs.")
+                    ->multiple()
+                    ->searchable()
+                    ->getSearchResultsUsing(function (string $search): array {
+                        return Achievement::with('game')
+                            ->where('title', 'like', "%{$search}%")
+                            ->orWhere('id', 'like', "%{$search}%")
+                            ->limit(50)
+                            ->get()
+                            ->mapWithKeys(function ($achievement) {
+                                return [$achievement->id => "ID: {$achievement->id} - Title: {$achievement->title} - Game: {$achievement->game->title}"];
+                            })
+                            ->toArray();
+                    })
+                    ->getOptionLabelsUsing(function (array $values): array {
+                        return Achievement::with('game')
+                            ->whereIn('id', $values)
+                            ->get()
+                            ->mapWithKeys(function ($achievement) {
+                                return [$achievement->id => "ID: {$achievement->id} - Title: {$achievement->title} - Game: {$achievement->game->title}"];
+                            })
+                            ->toArray();
+                    })
+                    ->disabled(fn (Get $get): bool => filled($get('achievementIdsCsv')))
+                    ->live()
+                    ->requiredWithout('achievementIdsCsv')
+                    ->afterStateUpdated(fn (Set $set) => $set('achievementIdsCsv', null))
+                    ->helperText('... or search and select achievements to add.'),
 
                 Forms\Components\ToggleButtons::make('mode')
                     ->options([
@@ -156,7 +276,7 @@ new class extends Component implements HasForms {
 
 <div>
     <form wire:submit.prevent="submit">
-        <div class="flex flex-col gap-y-4">
+        <div class="flex flex-col gap-y-4 max-w-[240px]">
             {{ $this->form }}
 
             <div class="flex w-full justify-end">
@@ -165,7 +285,7 @@ new class extends Component implements HasForms {
         </div>
     </form>
 
-    <x-filament::modal id="confirm-unlock-modal" width="2xl">
+    <x-filament::modal id="confirm-unlock-modal" width="4xl">
         <x-slot name="heading">Confirm Unlocks</x-slot>
 
         @php
@@ -179,7 +299,7 @@ new class extends Component implements HasForms {
         @endphp
 
         <div class="mb-6 overflow-x-auto rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10 p-4">
-            <div class="min-w-[40rem]">
+            <div>
                 <p class="text-sm text-gray-600 dark:text-gray-400">
                     You are about to award <span class="font-medium text-gray-950 dark:text-white">{{ count($this->validAchievementIds) }}</span> achievement(s) worth a total of <span class="font-medium text-gray-950 dark:text-white">{{ number_format($achievements->sum('points')) }}</span> point(s) to <span class="font-medium text-gray-950 dark:text-white">{{ count($this->validUserIds) }}</span> user(s) in <span class="font-medium text-primary-600 dark:text-primary-400 uppercase">{{ $this->selectedMode }}</span> mode. <br> 
                     This will queue <span class="font-medium text-gray-950 dark:text-white">{{ count($this->validAchievementIds) * count($this->validUserIds) }}</span> unlock job(s).
@@ -200,7 +320,7 @@ new class extends Component implements HasForms {
 
         <div class="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10">
             <div class="max-h-96 overflow-y-auto overflow-x-auto">
-                <table class="fi-ta-table w-full text-sm text-left min-w-[40rem]">
+                <table class="fi-ta-table w-full text-sm text-left">
                     <tbody class="divide-y divide-gray-200 dark:divide-white/5">
                         @foreach($groupedAchievements as $gameId => $group)
                             @php
@@ -210,7 +330,7 @@ new class extends Component implements HasForms {
                                 <th colspan="3" class="px-4 py-3 text-left">
                                     <div class="flex items-center gap-3">
                                         @if($game && !empty($game->image_icon_asset_path))
-                                            <img src="{{ media_asset($game->image_icon_asset_path) }}" alt="Game Icon" class="w-8 h-8 rounded-sm object-contain bg-white dark:bg-gray-900 ring-1 ring-gray-950/10 dark:ring-white/20" onerror="this.style.display='none'">
+                                            <img src="{{ media_asset($game->image_icon_asset_path) }}" alt="Game Icon" class="w-10 h-10 rounded-sm object-contain bg-white dark:bg-gray-900 ring-1 ring-gray-950/10 dark:ring-white/20" onerror="this.style.display='none'">
                                         @endif
                                         <div class="flex flex-col">
                                             @if($game)
@@ -227,10 +347,12 @@ new class extends Component implements HasForms {
                             </tr>
                             @foreach($group as $achievement)
                             <tr class="fi-ta-row hover:bg-gray-50 dark:hover:bg-white/5 transition cursor-pointer" onclick="window.open('{{ route('achievement.show', $achievement->id) }}', '_blank')">
-                                <td class="fi-ta-cell px-4 py-3 w-16 align-top">
-                                    <img src="{{ media_asset('Badge/' . $achievement->image_name . '.png') }}" alt="Badge" class="w-10 h-10 object-contain rounded-md bg-white dark:bg-gray-900 ring-1 ring-gray-950/10 dark:ring-white/20" onerror="this.style.display='none'">
+                                <td class="fi-ta-cell px-4 py-3 w-px align-top whitespace-nowrap">
+                                    <div class="w-10 h-10">
+                                        <img src="{{ media_asset('Badge/' . $achievement->image_name . '.png') }}" alt="Badge" class="w-full h-full object-contain rounded-md bg-white dark:bg-gray-900 ring-1 ring-gray-950/10 dark:ring-white/20" onerror="this.style.display='none'">
+                                    </div>
                                 </td>
-                                <td class="fi-ta-cell px-4 py-3 align-top">
+                                <td class="fi-ta-cell px-4 py-3 align-top w-full min-w-[12rem]">
                                     <div class="flex flex-col">
                                         <a href="{{ route('achievement.show', $achievement->id) }}" target="_blank" class="font-medium text-gray-950 dark:text-white hover:underline">
                                             {{ $achievement->title }}
@@ -240,9 +362,9 @@ new class extends Component implements HasForms {
                                         </span>
                                     </div>
                                 </td>
-                                <td class="fi-ta-cell px-4 py-3 text-right align-top">
-                                    <div class="flex flex-col items-end gap-1">
-                                        <span class="font-mono text-sm overflow-hidden whitespace-normal" style="min-width: 5rem; word-wrap: break-word;">{{ number_format($achievement->points) }} pts</span>
+                                <td class="fi-ta-cell px-4 py-3 w-px text-right align-top whitespace-nowrap">
+                                    <div class="flex flex-col items-end gap-1 min-w-max">
+                                        <span class="font-mono text-sm">{{ number_format($achievement->points) }} pts</span>
                                         @if(!empty($achievement->type))
                                             @php
                                                 $typeLabel = match ($achievement->type) {
