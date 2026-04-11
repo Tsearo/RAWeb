@@ -17,7 +17,12 @@ describe('Component: AchievementContributePanel', () => {
     const { container } = render(<AchievementContributePanel />, {
       pageProps: {
         achievement,
-        can: { develop: true, manageAchievements: true, updateAchievementQuickEdit: true, viewAchievementLogic: false },
+        can: {
+          develop: true,
+          manageAchievements: true,
+          updateAchievementQuickEdit: true,
+          viewAchievementLogic: false,
+        },
       },
     });
 
@@ -56,7 +61,12 @@ describe('Component: AchievementContributePanel', () => {
     render(<AchievementContributePanel />, {
       pageProps: {
         achievement,
-        can: { develop: true, manageAchievements: true, updateAchievementQuickEdit: true, viewAchievementLogic: false },
+        can: {
+          develop: true,
+          manageAchievements: true,
+          updateAchievementQuickEdit: true,
+          viewAchievementLogic: false,
+        },
       },
     });
 
@@ -75,7 +85,12 @@ describe('Component: AchievementContributePanel', () => {
     render(<AchievementContributePanel />, {
       pageProps: {
         achievement,
-        can: { develop: true, manageAchievements: true, updateAchievementQuickEdit: false, viewAchievementLogic: false },
+        can: {
+          develop: true,
+          manageAchievements: true,
+          updateAchievementQuickEdit: false,
+          viewAchievementLogic: false,
+        },
       },
     });
 
@@ -96,7 +111,12 @@ describe('Component: AchievementContributePanel', () => {
     render(<AchievementContributePanel />, {
       pageProps: {
         achievement,
-        can: { develop: true, manageAchievements: true, updateAchievementQuickEdit: true, viewAchievementLogic: false },
+        can: {
+          develop: true,
+          manageAchievements: true,
+          updateAchievementQuickEdit: true,
+          viewAchievementLogic: false,
+        },
       },
     });
 
@@ -118,7 +138,12 @@ describe('Component: AchievementContributePanel', () => {
     render(<AchievementContributePanel />, {
       pageProps: {
         achievement,
-        can: { develop: true, manageAchievements: true, updateAchievementQuickEdit: true, viewAchievementLogic: true },
+        can: {
+          develop: true,
+          manageAchievements: true,
+          updateAchievementQuickEdit: true,
+          viewAchievementLogic: true,
+        },
       },
     });
 
@@ -139,7 +164,12 @@ describe('Component: AchievementContributePanel', () => {
     render(<AchievementContributePanel />, {
       pageProps: {
         achievement,
-        can: { develop: true, manageAchievements: true, updateAchievementQuickEdit: true, viewAchievementLogic: false },
+        can: {
+          develop: true,
+          manageAchievements: true,
+          updateAchievementQuickEdit: true,
+          viewAchievementLogic: false,
+        },
       },
     });
 
@@ -158,7 +188,12 @@ describe('Component: AchievementContributePanel', () => {
     render(<AchievementContributePanel />, {
       pageProps: {
         achievement,
-        can: { develop: true, manageAchievements: false, updateAchievementQuickEdit: false, viewAchievementLogic: true },
+        can: {
+          develop: true,
+          manageAchievements: false,
+          updateAchievementQuickEdit: false,
+          viewAchievementLogic: true,
+        },
       },
     });
 
@@ -178,7 +213,12 @@ describe('Component: AchievementContributePanel', () => {
     render(<AchievementContributePanel />, {
       pageProps: {
         achievement,
-        can: { develop: true, manageAchievements: true, updateAchievementQuickEdit: true, viewAchievementLogic: false },
+        can: {
+          develop: true,
+          manageAchievements: true,
+          updateAchievementQuickEdit: true,
+          viewAchievementLogic: false,
+        },
       },
     });
 
@@ -197,7 +237,12 @@ describe('Component: AchievementContributePanel', () => {
     render(<AchievementContributePanel />, {
       pageProps: {
         achievement,
-        can: { develop: true, manageAchievements: true, updateAchievementQuickEdit: true, viewAchievementLogic: true },
+        can: {
+          develop: true,
+          manageAchievements: true,
+          updateAchievementQuickEdit: true,
+          viewAchievementLogic: true,
+        },
         isEventGame: true,
       },
     });
@@ -220,7 +265,12 @@ describe('Component: AchievementContributePanel', () => {
     render(<AchievementContributePanel />, {
       pageProps: {
         achievement,
-        can: { develop: true, manageAchievements: true, updateAchievementQuickEdit: true, viewAchievementLogic: false },
+        can: {
+          develop: true,
+          manageAchievements: true,
+          updateAchievementQuickEdit: true,
+          viewAchievementLogic: false,
+        },
       },
     });
 

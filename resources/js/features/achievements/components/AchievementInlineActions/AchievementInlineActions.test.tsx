@@ -154,7 +154,12 @@ describe('Component: AchievementInlineActions', () => {
     render(<AchievementInlineActions />, {
       pageProps: {
         achievement,
-        can: { develop: true, manageAchievements: true, updateAchievementQuickEdit: true, viewAchievementLogic: false },
+        can: {
+          develop: true,
+          manageAchievements: true,
+          updateAchievementQuickEdit: true,
+          viewAchievementLogic: false,
+        },
       },
     });
 
@@ -172,7 +177,12 @@ describe('Component: AchievementInlineActions', () => {
     render(<AchievementInlineActions />, {
       pageProps: {
         achievement,
-        can: { develop: true, manageAchievements: true, updateAchievementQuickEdit: true, viewAchievementLogic: false },
+        can: {
+          develop: true,
+          manageAchievements: true,
+          updateAchievementQuickEdit: true,
+          viewAchievementLogic: false,
+        },
       },
     });
 
@@ -194,7 +204,12 @@ describe('Component: AchievementInlineActions', () => {
     render(<AchievementInlineActions />, {
       pageProps: {
         achievement,
-        can: { develop: true, manageAchievements: true, updateAchievementQuickEdit: false, viewAchievementLogic: false },
+        can: {
+          develop: true,
+          manageAchievements: true,
+          updateAchievementQuickEdit: false,
+          viewAchievementLogic: false,
+        },
       },
     });
 
@@ -233,7 +248,12 @@ describe('Component: AchievementInlineActions', () => {
     render(<AchievementInlineActions />, {
       pageProps: {
         achievement,
-        can: { develop: true, manageAchievements: true, updateAchievementQuickEdit: true, viewAchievementLogic: false },
+        can: {
+          develop: true,
+          manageAchievements: true,
+          updateAchievementQuickEdit: true,
+          viewAchievementLogic: false,
+        },
       },
     });
 
@@ -251,7 +271,12 @@ describe('Component: AchievementInlineActions', () => {
     render(<AchievementInlineActions />, {
       pageProps: {
         achievement,
-        can: { develop: true, manageAchievements: true, updateAchievementQuickEdit: true, viewAchievementLogic: false },
+        can: {
+          develop: true,
+          manageAchievements: true,
+          updateAchievementQuickEdit: true,
+          viewAchievementLogic: false,
+        },
       },
     });
 
@@ -272,7 +297,13 @@ describe('Component: AchievementInlineActions', () => {
     render(<AchievementInlineActions />, {
       pageProps: {
         achievement,
-        can: { develop: true, manageAchievements: true, updateAchievementQuickEdit: true, updateAchievementIsPromoted: true, viewAchievementLogic: false },
+        can: {
+          develop: true,
+          manageAchievements: true,
+          updateAchievementQuickEdit: true,
+          updateAchievementIsPromoted: true,
+          viewAchievementLogic: false,
+        },
       },
     });
 
@@ -291,7 +322,13 @@ describe('Component: AchievementInlineActions', () => {
     render(<AchievementInlineActions />, {
       pageProps: {
         achievement,
-        can: { develop: true, manageAchievements: true, updateAchievementQuickEdit: true, updateAchievementIsPromoted: true, viewAchievementLogic: false },
+        can: {
+          develop: true,
+          manageAchievements: true,
+          updateAchievementQuickEdit: true,
+          updateAchievementIsPromoted: true,
+          viewAchievementLogic: false,
+        },
       },
     });
 
@@ -315,7 +352,13 @@ describe('Component: AchievementInlineActions', () => {
       {
         pageProps: {
           achievement,
-          can: { develop: true, manageAchievements: true, updateAchievementQuickEdit: true, updateAchievementIsPromoted: true, viewAchievementLogic: false },
+          can: {
+            develop: true,
+            manageAchievements: true,
+            updateAchievementQuickEdit: true,
+            updateAchievementIsPromoted: true,
+            viewAchievementLogic: false,
+          },
         },
       },
     );
@@ -406,7 +449,13 @@ describe('Component: AchievementInlineActions', () => {
     render(<AchievementInlineActions />, {
       pageProps: {
         achievement,
-        can: { develop: true, manageAchievements: true, updateAchievementQuickEdit: true, updateAchievementIsPromoted: false, viewAchievementLogic: false },
+        can: {
+          develop: true,
+          manageAchievements: true,
+          updateAchievementQuickEdit: true,
+          updateAchievementIsPromoted: false,
+          viewAchievementLogic: false,
+        },
       },
     });
 

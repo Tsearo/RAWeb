@@ -108,7 +108,10 @@ export const AchievementInlineActions: FC = () => {
             ) : null}
 
             {/* Mobile: show an overflow menu with dev tools and reset progress */}
-            {can?.manageAchievements || can?.updateAchievementQuickEdit || can?.viewAchievementLogic || canResetProgress ? (
+            {can?.manageAchievements ||
+            can?.updateAchievementQuickEdit ||
+            can?.viewAchievementLogic ||
+            canResetProgress ? (
               <div className="lg:hidden">
                 <BaseDropdownMenu>
                   <BaseDropdownMenuTrigger asChild>
@@ -151,7 +154,9 @@ export const AchievementInlineActions: FC = () => {
 
                     {canResetProgress ? (
                       <>
-                        {can?.manageAchievements || can?.updateAchievementQuickEdit || can?.viewAchievementLogic ? (
+                        {can?.manageAchievements ||
+                        can?.updateAchievementQuickEdit ||
+                        can?.viewAchievementLogic ? (
                           <BaseDropdownMenuSeparator />
                         ) : null}
 
