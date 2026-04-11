@@ -404,7 +404,7 @@ describe('Component: AchievementShowRoot', () => {
         can: {
           createAchievementComments: false,
           develop: true,
-          updateAchievementQuickEdit: true,
+          quickEditAchievement: true,
           updateAchievementIsPromoted: true,
           viewAchievementLogic: false,
         },
@@ -473,7 +473,7 @@ describe('Component: AchievementShowRoot', () => {
         can: {
           createAchievementComments: false,
           develop: true,
-          updateAchievementQuickEdit: true,
+          quickEditAchievement: true,
           updateAchievementTitle: true,
           viewAchievementLogic: false,
         },
@@ -522,7 +522,7 @@ describe('Component: AchievementShowRoot', () => {
         can: {
           createAchievementComments: false,
           develop: true,
-          updateAchievementQuickEdit: true,
+          quickEditAchievement: true,
           updateAchievementTitle: true,
           viewAchievementLogic: false,
         },
@@ -562,7 +562,7 @@ describe('Component: AchievementShowRoot', () => {
         can: {
           createAchievementComments: false,
           develop: true,
-          updateAchievementQuickEdit: true,
+          quickEditAchievement: true,
           updateAchievementTitle: true,
           viewAchievementLogic: false,
         },
@@ -611,7 +611,7 @@ describe('Component: AchievementShowRoot', () => {
         can: {
           createAchievementComments: false,
           develop: true,
-          updateAchievementQuickEdit: true,
+          quickEditAchievement: true,
           updateAchievementTitle: true,
           viewAchievementLogic: false,
         },
@@ -660,7 +660,7 @@ describe('Component: AchievementShowRoot', () => {
         can: {
           createAchievementComments: false,
           develop: true,
-          updateAchievementQuickEdit: true,
+          quickEditAchievement: true,
           updateAchievementPoints: true,
           viewAchievementLogic: false,
         },
@@ -706,7 +706,7 @@ describe('Component: AchievementShowRoot', () => {
         can: {
           createAchievementComments: false,
           develop: true,
-          updateAchievementQuickEdit: true,
+          quickEditAchievement: true,
           updateAchievementType: true,
           viewAchievementLogic: false,
         },
@@ -871,7 +871,7 @@ describe('Component: AchievementShowRoot', () => {
         can: {
           createAchievementComments: false,
           develop: true,
-          updateAchievementQuickEdit: true,
+          quickEditAchievement: true,
           updateAchievementTitle: true,
           viewAchievementLogic: false,
         },

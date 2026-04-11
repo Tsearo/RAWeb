@@ -69,7 +69,7 @@ export const AchievementInlineActions: FC = () => {
       ) : null}
 
       <div className="flex items-center gap-1.5">
-        {isEditMode && can?.updateAchievementQuickEdit ? (
+        {isEditMode && can?.quickEditAchievement ? (
           <div className="flex items-center gap-1.5">
             <BaseButton onClick={handleCancel} size="xs" className="gap-1">
               <LuX className="size-3" />
@@ -109,7 +109,7 @@ export const AchievementInlineActions: FC = () => {
 
             {/* Mobile: show an overflow menu with dev tools and reset progress */}
             {can?.manageAchievements ||
-            can?.updateAchievementQuickEdit ||
+            can?.quickEditAchievement ||
             can?.viewAchievementLogic ||
             canResetProgress ? (
               <div className="lg:hidden">
@@ -141,8 +141,8 @@ export const AchievementInlineActions: FC = () => {
                       </BaseDropdownMenuItem>
                     ) : null}
 
-                    {/* Quick Edit button: visible if can.updateAchievementQuickEdit and not an event game */}
-                    {can?.updateAchievementQuickEdit && !isEventGame ? (
+                    {/* Quick Edit button: visible if can.quickEditAchievement and not an event game */}
+                    {can?.quickEditAchievement && !isEventGame ? (
                       <BaseDropdownMenuItem
                         className="cursor-pointer gap-2 text-link"
                         onClick={() => setIsEditMode(true)}
@@ -155,7 +155,7 @@ export const AchievementInlineActions: FC = () => {
                     {canResetProgress ? (
                       <>
                         {can?.manageAchievements ||
-                        can?.updateAchievementQuickEdit ||
+                        can?.quickEditAchievement ||
                         can?.viewAchievementLogic ? (
                           <BaseDropdownMenuSeparator />
                         ) : null}

@@ -42,8 +42,8 @@ describe('Component: UpdatePromotedStatusDialog', () => {
           achievement,
           can: {
             develop: true,
+            quickEditAchievement: true,
             updateAchievementIsPromoted: true,
-            updateAchievementQuickEdit: true,
             viewAchievementLogic: false,
           },
         },
@@ -73,8 +73,8 @@ describe('Component: UpdatePromotedStatusDialog', () => {
           achievement,
           can: {
             develop: true,
+            quickEditAchievement: true,
             updateAchievementIsPromoted: true,
-            updateAchievementQuickEdit: true,
             viewAchievementLogic: false,
           },
         },
@@ -104,8 +104,8 @@ describe('Component: UpdatePromotedStatusDialog', () => {
           achievement,
           can: {
             develop: true,
+            quickEditAchievement: true,
             updateAchievementIsPromoted: true,
-            updateAchievementQuickEdit: true,
             viewAchievementLogic: false,
           },
         },
@@ -135,8 +135,8 @@ describe('Component: UpdatePromotedStatusDialog', () => {
           achievement,
           can: {
             develop: true,
+            quickEditAchievement: true,
             updateAchievementIsPromoted: true,
-            updateAchievementQuickEdit: true,
             viewAchievementLogic: false,
           },
         },

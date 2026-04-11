@@ -20,7 +20,7 @@ describe('Component: AchievementContributePanel', () => {
         can: {
           develop: true,
           manageAchievements: true,
-          updateAchievementQuickEdit: true,
+          quickEditAchievement: true,
           viewAchievementLogic: false,
         },
       },
@@ -64,7 +64,7 @@ describe('Component: AchievementContributePanel', () => {
         can: {
           develop: true,
           manageAchievements: true,
-          updateAchievementQuickEdit: true,
+          quickEditAchievement: true,
           viewAchievementLogic: false,
         },
       },
@@ -88,7 +88,7 @@ describe('Component: AchievementContributePanel', () => {
         can: {
           develop: true,
           manageAchievements: true,
-          updateAchievementQuickEdit: false,
+          quickEditAchievement: false,
           viewAchievementLogic: false,
         },
       },
@@ -114,7 +114,7 @@ describe('Component: AchievementContributePanel', () => {
         can: {
           develop: true,
           manageAchievements: true,
-          updateAchievementQuickEdit: true,
+          quickEditAchievement: true,
           viewAchievementLogic: false,
         },
       },
@@ -141,7 +141,7 @@ describe('Component: AchievementContributePanel', () => {
         can: {
           develop: true,
           manageAchievements: true,
-          updateAchievementQuickEdit: true,
+          quickEditAchievement: true,
           viewAchievementLogic: true,
         },
       },
@@ -167,7 +167,7 @@ describe('Component: AchievementContributePanel', () => {
         can: {
           develop: true,
           manageAchievements: true,
-          updateAchievementQuickEdit: true,
+          quickEditAchievement: true,
           viewAchievementLogic: false,
         },
       },
@@ -191,7 +191,7 @@ describe('Component: AchievementContributePanel', () => {
         can: {
           develop: true,
           manageAchievements: false,
-          updateAchievementQuickEdit: false,
+          quickEditAchievement: false,
           viewAchievementLogic: true,
         },
       },
@@ -216,7 +216,7 @@ describe('Component: AchievementContributePanel', () => {
         can: {
           develop: true,
           manageAchievements: true,
-          updateAchievementQuickEdit: true,
+          quickEditAchievement: true,
           viewAchievementLogic: false,
         },
       },
@@ -240,7 +240,7 @@ describe('Component: AchievementContributePanel', () => {
         can: {
           develop: true,
           manageAchievements: true,
-          updateAchievementQuickEdit: true,
+          quickEditAchievement: true,
           viewAchievementLogic: true,
         },
         isEventGame: true,
@@ -268,7 +268,7 @@ describe('Component: AchievementContributePanel', () => {
         can: {
           develop: true,
           manageAchievements: true,
-          updateAchievementQuickEdit: true,
+          quickEditAchievement: true,
           viewAchievementLogic: false,
         },
       },

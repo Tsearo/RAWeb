@@ -8,12 +8,12 @@ use App\Http\Controller;
 use App\Models\Achievement;
 use App\Models\User;
 use App\Platform\Enums\AchievementType;
-use App\Platform\Requests\UpdateAchievementQuickEditRequest;
+use App\Platform\Requests\quickEditAchievementRequest;
 use Illuminate\Http\JsonResponse;
 
 class AchievementApiController extends Controller
 {
-    public function update(UpdateAchievementQuickEditRequest $request, Achievement $achievement): JsonResponse
+    public function update(quickEditAchievementRequest $request, Achievement $achievement): JsonResponse
     {
         $this->authorize('update', $achievement);
 

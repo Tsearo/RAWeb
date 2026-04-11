@@ -19,7 +19,7 @@ export const AchievementContributePanel: FC = () => {
   const [isEditMode, setIsEditMode] = useAtom(isEditModeAtom);
   const { handleCancel } = useAchievementQuickEditActions();
 
-  if (!can?.manageAchievements && !can?.updateAchievementQuickEdit && !can?.viewAchievementLogic) {
+  if (!can?.manageAchievements && !can?.quickEditAchievement && !can?.viewAchievementLogic) {
     return null;
   }
 
@@ -36,7 +36,7 @@ export const AchievementContributePanel: FC = () => {
           </PlayableSidebarButton>
         ) : (
           <>
-            {can?.updateAchievementQuickEdit ? (
+            {can?.quickEditAchievement ? (
               isEditMode ? (
                 <PlayableSidebarButton onClick={handleCancel} IconComponent={LuX}>
                   {t('Cancel Editing')}
@@ -47,6 +47,7 @@ export const AchievementContributePanel: FC = () => {
                 </PlayableSidebarButton>
               )
             ) : null}
+
             <div className="grid grid-cols-2 gap-1">
               {can.manageAchievements ? (
                 <PlayableSidebarButton

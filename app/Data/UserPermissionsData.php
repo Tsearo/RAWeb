@@ -45,12 +45,12 @@ class UserPermissionsData extends Data
         public Lazy|bool $manageGames,
         public Lazy|bool $manageGameSets,
         public Lazy|bool $manipulateApiKeys,
+        public Lazy|bool $quickEditAchievement,
         public Lazy|bool $resetEntireAccount,
         public Lazy|bool $reviewAchievementSetClaims,
         public Lazy|bool $updateAchievementDescription,
         public Lazy|bool $updateAchievementIsPromoted,
         public Lazy|bool $updateAchievementPoints,
-        public Lazy|bool $updateAchievementQuickEdit,
         public Lazy|bool $updateAchievementTitle,
         public Lazy|bool $updateAchievementType,
         public Lazy|bool $updateAnyAchievementSetClaim,
@@ -142,7 +142,7 @@ class UserPermissionsData extends Data
                 ? $user->can('updateField', [$triggerable, 'type'])
                 : false
             ),
-            updateAchievementQuickEdit: Lazy::create(fn () => $user && $triggerable instanceof Achievement
+            quickEditAchievement: Lazy::create(fn () => $user && $triggerable instanceof Achievement
                 ? $user->can('quickEdit', $triggerable)
                 : false
             ),

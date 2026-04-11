@@ -113,12 +113,22 @@ new class extends Component implements HasForms {
                 $setLinks = $links->where('achievement_set_id', $setId);
                 $coreLink = $setLinks->firstWhere('type', App\Platform\Enums\AchievementSetType::Core->value);
                 $bonusLink = $setLinks->firstWhere('type', App\Platform\Enums\AchievementSetType::Bonus->value);
+                $challengeLink = $setLinks->firstWhere('type', App\Platform\Enums\AchievementSetType::Challenge->value);
                 $specialtyLink = $setLinks->firstWhere('type', App\Platform\Enums\AchievementSetType::Specialty->value);
                 $exclusiveLink = $setLinks->firstWhere('type', App\Platform\Enums\AchievementSetType::Exclusive->value);
+                $willBeBonusLink = $setLinks->firstWhere('type', App\Platform\Enums\AchievementSetType::WillBeBonus->value);
+                $willBeChallengeLink = $setLinks->firstWhere('type', App\Platform\Enums\AchievementSetType::WillBeChallenge->value);
+                $willBeSpecialtyLink = $setLinks->firstWhere('type', App\Platform\Enums\AchievementSetType::WillBeSpecialty->value);
 
-                // Specialty and Bonus sets fall back to the base game ID.
-                // Exclusive sets remain isolated by falling back to their own core link's game ID.
-                $baseGameId = $bonusLink?->game_id ?? $specialtyLink?->game_id ?? $coreLink?->game_id;
+                // Subsets that load with a base game fall back to that game's ID.
+                // Specialty and exclusive sets remain isolated by falling back to their own core link's game ID.
+                $baseGameId = $bonusLink?->game_id
+                    ?? $challengeLink?->game_id
+                    ?? $specialtyLink?->game_id
+                    ?? $willBeBonusLink?->game_id
+                    ?? $willBeChallengeLink?->game_id
+                    ?? $willBeSpecialtyLink?->game_id
+                    ?? $coreLink?->game_id;
 
                 if ($baseGameId) {
                     $baseGameIds->push($baseGameId);

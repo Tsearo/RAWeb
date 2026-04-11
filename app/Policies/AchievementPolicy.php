@@ -44,8 +44,8 @@ class AchievementPolicy
             Role::WRITER,
 
             /*
-            * unlockers can view achievement logic as part of their review
-            */
+             * unlockers can view achievement logic as part of their review
+             */
             Role::MANUAL_UNLOCKER,
         ]);
     }

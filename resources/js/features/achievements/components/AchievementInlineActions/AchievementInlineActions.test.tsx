@@ -157,7 +157,7 @@ describe('Component: AchievementInlineActions', () => {
         can: {
           develop: true,
           manageAchievements: true,
-          updateAchievementQuickEdit: true,
+          quickEditAchievement: true,
           viewAchievementLogic: false,
         },
       },
@@ -180,7 +180,7 @@ describe('Component: AchievementInlineActions', () => {
         can: {
           develop: true,
           manageAchievements: true,
-          updateAchievementQuickEdit: true,
+          quickEditAchievement: true,
           viewAchievementLogic: false,
         },
       },
@@ -207,7 +207,7 @@ describe('Component: AchievementInlineActions', () => {
         can: {
           develop: true,
           manageAchievements: true,
-          updateAchievementQuickEdit: false,
+          quickEditAchievement: false,
           viewAchievementLogic: false,
         },
       },
@@ -251,7 +251,7 @@ describe('Component: AchievementInlineActions', () => {
         can: {
           develop: true,
           manageAchievements: true,
-          updateAchievementQuickEdit: true,
+          quickEditAchievement: true,
           viewAchievementLogic: false,
         },
       },
@@ -274,7 +274,7 @@ describe('Component: AchievementInlineActions', () => {
         can: {
           develop: true,
           manageAchievements: true,
-          updateAchievementQuickEdit: true,
+          quickEditAchievement: true,
           viewAchievementLogic: false,
         },
       },
@@ -300,7 +300,7 @@ describe('Component: AchievementInlineActions', () => {
         can: {
           develop: true,
           manageAchievements: true,
-          updateAchievementQuickEdit: true,
+          quickEditAchievement: true,
           updateAchievementIsPromoted: true,
           viewAchievementLogic: false,
         },
@@ -325,7 +325,7 @@ describe('Component: AchievementInlineActions', () => {
         can: {
           develop: true,
           manageAchievements: true,
-          updateAchievementQuickEdit: true,
+          quickEditAchievement: true,
           updateAchievementIsPromoted: true,
           viewAchievementLogic: false,
         },
@@ -355,7 +355,7 @@ describe('Component: AchievementInlineActions', () => {
           can: {
             develop: true,
             manageAchievements: true,
-            updateAchievementQuickEdit: true,
+            quickEditAchievement: true,
             updateAchievementIsPromoted: true,
             viewAchievementLogic: false,
           },
@@ -452,7 +452,7 @@ describe('Component: AchievementInlineActions', () => {
         can: {
           develop: true,
           manageAchievements: true,
-          updateAchievementQuickEdit: true,
+          quickEditAchievement: true,
           updateAchievementIsPromoted: false,
           viewAchievementLogic: false,
         },
