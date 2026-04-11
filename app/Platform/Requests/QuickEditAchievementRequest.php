@@ -6,7 +6,7 @@ namespace App\Platform\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class quickEditAchievementRequest extends FormRequest
+class QuickEditAchievementRequest extends FormRequest
 {
     public function rules(): array
     {
