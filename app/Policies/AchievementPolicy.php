@@ -17,6 +17,9 @@ class AchievementPolicy
     public function manage(User $user): bool
     {
         return $user->hasAnyRole([
+            /*
+             * game hash manager may delete or restore achievements
+             */
             Role::GAME_HASH_MANAGER,
 
             /*
@@ -74,7 +77,8 @@ class AchievementPolicy
     public function create(User $user): bool
     {
         return $user->hasAnyRole([
-            Role::GAME_HASH_MANAGER,
+            Role::DEVELOPER,
+            Role::DEVELOPER_JUNIOR,
         ]);
     }
 
@@ -108,9 +112,10 @@ class AchievementPolicy
 
     private function juniorDeveloperCanUpdate(User $user, Achievement $achievement): bool
     {
-        // If the user has a DEVELOPER_JUNIOR role, they need to have a claim
-        // on the game and the achievement must not be promoted to Core/Official.
-        return !$achievement->is_promoted && $user->hasActiveClaimOnGameId($achievement->game->id);
+        // If the user has a DEVELOPER_JUNIOR role, they need to be the achievement author,
+        // have a claim on the game, and the achievement must not be promoted.
+        return !$achievement->is_promoted && $achievement->user_id === $user->id
+            && $user->hasActiveClaimOnGameId($achievement->game->id);
     }
 
     public function delete(User $user, Achievement $achievement): bool
