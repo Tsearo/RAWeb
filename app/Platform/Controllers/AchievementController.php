@@ -229,9 +229,11 @@ class AchievementController extends Controller
             ->include(
                 'createAchievementComments',
                 'develop',
+                'manageAchievements',
                 'updateAchievementDescription',
                 'updateAchievementIsPromoted',
                 'updateAchievementPoints',
+                'updateAchievementQuickEdit',
                 'updateAchievementTitle',
                 'updateAchievementType',
                 'viewAchievementLogic',

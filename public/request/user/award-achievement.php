@@ -26,11 +26,6 @@ $player = User::whereName($input['user'])->first();
 $achievementId = $input['achievement'];
 $awardHardcore = (bool) $input['hardcore'];
 
-$awardResponse = unlockAchievement($player, $achievementId, $awardHardcore);
-if (array_key_exists('Error', $awardResponse)) {
-   return response()->json(['error' => $awardResponse['Error']]);
-}
-
 $action = app()->make(UnlockPlayerAchievementAction::class);
 
 $action->execute(

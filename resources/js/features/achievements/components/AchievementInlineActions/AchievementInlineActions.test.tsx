@@ -136,14 +136,32 @@ describe('Component: AchievementInlineActions', () => {
     expect(screen.getByRole('heading', { name: /reset progress/i })).toBeVisible();
   });
 
-  it('given the user can develop and is not in edit mode, shows the Manage and Quick edit items in the dropdown', async () => {
+  it('given the user can develop and has unlocked the achievement, shows a separator in the dropdown', async () => {
+    // ARRANGE
+    const achievement = createAchievement({ unlockedAt: '2024-01-15T12:00:00Z' });
+
+    render(<AchievementInlineActions />, {
+      pageProps: {
+        achievement,
+        can: { develop: true, manageAchievements: true, updateAchievementQuickEdit: true, viewAchievementLogic: false },
+      },
+    });
+
+    // ACT
+    await userEvent.click(screen.getByRole('button', { name: 'More actions' }));
+
+    // ASSERT
+    expect(screen.getByRole('separator')).toBeVisible();
+  });
+
+  it('given the user can develop and update description, shows the Manage and Quick edit items in the dropdown', async () => {
     // ARRANGE
     const achievement = createAchievement({ id: 789 });
 
     render(<AchievementInlineActions />, {
       pageProps: {
         achievement,
-        can: { develop: true, viewAchievementLogic: false },
+        can: { develop: true, manageAchievements: true, updateAchievementQuickEdit: true, viewAchievementLogic: false },
       },
     });
 
@@ -158,6 +176,25 @@ describe('Component: AchievementInlineActions', () => {
     expect(screen.getByRole('menuitem', { name: /quick edit/i })).toBeVisible();
   });
 
+  it('given the user can develop but cannot update title or description, shows Manage but not Quick edit items in the dropdown', async () => {
+    // ARRANGE
+    const achievement = createAchievement({ id: 789 });
+
+    render(<AchievementInlineActions />, {
+      pageProps: {
+        achievement,
+        can: { develop: true, manageAchievements: true, updateAchievementQuickEdit: false, viewAchievementLogic: false },
+      },
+    });
+
+    // ACT
+    await userEvent.click(screen.getByRole('button', { name: 'More actions' }));
+
+    // ASSERT
+    expect(screen.getByRole('menuitem', { name: /manage/i })).toBeVisible();
+    expect(screen.queryByRole('menuitem', { name: /quick edit/i })).not.toBeInTheDocument();
+  });
+
   it('given the user can view achievement logic, shows the Logic item in the dropdown', async () => {
     // ARRANGE
     const achievement = createAchievement({ id: 789 });
@@ -165,7 +202,7 @@ describe('Component: AchievementInlineActions', () => {
     render(<AchievementInlineActions />, {
       pageProps: {
         achievement,
-        can: { develop: true, viewAchievementLogic: true },
+        can: { develop: true, manageAchievements: true, viewAchievementLogic: true },
       },
     });
 
@@ -185,7 +222,7 @@ describe('Component: AchievementInlineActions', () => {
     render(<AchievementInlineActions />, {
       pageProps: {
         achievement,
-        can: { develop: true, viewAchievementLogic: false },
+        can: { develop: true, manageAchievements: true, updateAchievementQuickEdit: true, viewAchievementLogic: false },
       },
     });
 
@@ -203,7 +240,7 @@ describe('Component: AchievementInlineActions', () => {
     render(<AchievementInlineActions />, {
       pageProps: {
         achievement,
-        can: { develop: true, viewAchievementLogic: false },
+        can: { develop: true, manageAchievements: true, updateAchievementQuickEdit: true, viewAchievementLogic: false },
       },
     });
 
@@ -224,7 +261,7 @@ describe('Component: AchievementInlineActions', () => {
     render(<AchievementInlineActions />, {
       pageProps: {
         achievement,
-        can: { develop: true, updateAchievementIsPromoted: true, viewAchievementLogic: false },
+        can: { develop: true, manageAchievements: true, updateAchievementQuickEdit: true, updateAchievementIsPromoted: true, viewAchievementLogic: false },
       },
     });
 
@@ -243,7 +280,7 @@ describe('Component: AchievementInlineActions', () => {
     render(<AchievementInlineActions />, {
       pageProps: {
         achievement,
-        can: { develop: true, updateAchievementIsPromoted: true, viewAchievementLogic: false },
+        can: { develop: true, manageAchievements: true, updateAchievementQuickEdit: true, updateAchievementIsPromoted: true, viewAchievementLogic: false },
       },
     });
 
@@ -267,7 +304,7 @@ describe('Component: AchievementInlineActions', () => {
       {
         pageProps: {
           achievement,
-          can: { develop: true, updateAchievementIsPromoted: true, viewAchievementLogic: false },
+          can: { develop: true, manageAchievements: true, updateAchievementQuickEdit: true, updateAchievementIsPromoted: true, viewAchievementLogic: false },
         },
       },
     );
@@ -336,7 +373,7 @@ describe('Component: AchievementInlineActions', () => {
     render(<AchievementInlineActions />, {
       pageProps: {
         achievement,
-        can: { develop: true, viewAchievementLogic: true },
+        can: { develop: true, manageAchievements: true, viewAchievementLogic: true },
         isEventGame: true,
       },
     });
@@ -357,7 +394,7 @@ describe('Component: AchievementInlineActions', () => {
     render(<AchievementInlineActions />, {
       pageProps: {
         achievement,
-        can: { develop: true, updateAchievementIsPromoted: false, viewAchievementLogic: false },
+        can: { develop: true, manageAchievements: true, updateAchievementQuickEdit: true, updateAchievementIsPromoted: false, viewAchievementLogic: false },
       },
     });
 

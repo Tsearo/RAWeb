@@ -8,10 +8,12 @@ use App\Platform\Jobs\UnlockPlayerAchievementJob;
 use Filament\Forms;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
+use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
-use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -55,9 +57,9 @@ new class extends Component implements HasForms {
         } else {
             $usernames = array_filter(array_unique(array_map('trim', preg_split('/[\s,]+/', (string) $this->usernamesCsv))));
             $users = User::whereIn('username', $usernames)->get();
-            $foundUsernamesLower = $users->pluck('username')->map(fn($u) => strtolower((string) $u))->toArray();
+            $foundUsernamesLower = $users->pluck('username')->map(fn ($u) => strtolower((string) $u))->toArray();
 
-            $this->missingUsernames = array_values(array_filter($usernames, fn($u) => !in_array(strtolower((string) $u), $foundUsernamesLower)));
+            $this->missingUsernames = array_values(array_filter($usernames, fn ($u) => !in_array(strtolower((string) $u), $foundUsernamesLower)));
             $this->validUserIds = $users->pluck('id')->toArray();
             $this->validUsernames = $users->pluck('username')->toArray();
         }
@@ -97,46 +99,39 @@ new class extends Component implements HasForms {
         } elseif (!empty($this->missingAchievementIds)) {
             $errors['achievementIdsCsv'] = 'Invalid Achievements: ' . implode(', ', $this->missingAchievementIds);
         } else {
-            $setIds = \Illuminate\Support\Facades\DB::table('achievement_set_achievements')
+            $setIds = Illuminate\Support\Facades\DB::table('achievement_set_achievements')
                 ->whereIn('achievement_id', $achievements->pluck('id'))
                 ->pluck('achievement_set_id')
                 ->unique();
 
-            $links = \Illuminate\Support\Facades\DB::table('game_achievement_sets')
+            $links = Illuminate\Support\Facades\DB::table('game_achievement_sets')
                 ->whereIn('achievement_set_id', $setIds)
                 ->get();
 
             $baseGameIds = collect();
             foreach ($setIds as $setId) {
                 $setLinks = $links->where('achievement_set_id', $setId);
-                $coreLink = $setLinks->firstWhere('type', \App\Platform\Enums\AchievementSetType::Core->value);
-                $bonusLink = $setLinks->firstWhere('type', \App\Platform\Enums\AchievementSetType::Bonus->value);
-                $specialtyLink = $setLinks->firstWhere('type', \App\Platform\Enums\AchievementSetType::Specialty->value);
-                $exclusiveLink = $setLinks->firstWhere('type', \App\Platform\Enums\AchievementSetType::Exclusive->value);
+                $coreLink = $setLinks->firstWhere('type', App\Platform\Enums\AchievementSetType::Core->value);
+                $bonusLink = $setLinks->firstWhere('type', App\Platform\Enums\AchievementSetType::Bonus->value);
+                $specialtyLink = $setLinks->firstWhere('type', App\Platform\Enums\AchievementSetType::Specialty->value);
+                $exclusiveLink = $setLinks->firstWhere('type', App\Platform\Enums\AchievementSetType::Exclusive->value);
 
                 // Specialty and Bonus sets fall back to the base game ID.
                 // Exclusive sets remain isolated by falling back to their own core link's game ID.
                 $baseGameId = $bonusLink?->game_id ?? $specialtyLink?->game_id ?? $coreLink?->game_id;
-                
+
                 if ($baseGameId) {
                     $baseGameIds->push($baseGameId);
                 }
             }
 
             if ($baseGameIds->unique()->count() > 1) {
-                $errors['achievementIdsCsv'] = 'Warning: Achievement IDs belong to different (base) games.';
+                $errors['achievementIdsCsv'] = 'Achievement IDs belong to different (base) games.';
             }
         }
 
-        $hasUnpromoted = $achievements->contains(fn($a) => !$a->is_promoted);
-        $isInvalidHardcore = $this->selectedMode === 'hardcore' && $hasUnpromoted;
-
-        if ($isInvalidHardcore) {
-            $errors['selectedMode'] = 'Unpromoted achievements can only be unlocked in softcore. Unpromoted Achievements: ' . implode(', ', $achievements->where('is_promoted', false)->pluck('id')->toArray());
-        }
-
         if (!empty($errors)) {
-            throw \Illuminate\Validation\ValidationException::withMessages($errors);
+            throw Illuminate\Validation\ValidationException::withMessages($errors);
         }
 
         $this->dispatch('open-modal', id: 'confirm-unlock-modal');
@@ -178,88 +173,108 @@ new class extends Component implements HasForms {
         $this->achievementIdsSelect = [];
         $this->selectedMode = null;
         $this->loadedAchievements = collect();
-        
+
         $this->dispatch('close-modal', id: 'confirm-unlock-modal');
     }
 
     public function form(Schema $schema): Schema
     {
         return $schema
-            ->schema([
-                Forms\Components\Textarea::make('usernamesCsv')
-                    ->label('Usernames CSV')
-                    ->placeholder("User1, User2, User3 or User1 User2 User3")
-                    ->helperText("Paste a comma or space-separated list of usernames.")
-                    ->disabled(fn (Get $get): bool => filled($get('usernamesSelect')))
-                    ->live(debounce: 200)
-                    ->rows(2)
-                    ->requiredWithout('usernamesSelect')
-                    ->afterStateUpdated(fn (Set $set) => $set('usernamesSelect', null)),
-
-                Forms\Components\Select::make('usernamesSelect')
-                    ->label('Usernames')
-                    ->requiredWithout('usernamesCsv')
-                    ->multiple()
-                    ->getOptionLabelsUsing(function (array $values): array {
-                        return User::whereIn('id', $values)->pluck('username', 'id')->toArray();
-                    })
-                    ->searchable()
-                    ->getSearchResultsUsing(function (string $search): array {
-                        return User::search($search)
-                            ->withTrashed()
-                            ->take(50)
-                            ->get()
-                            ->pluck('username', 'id')
-                            ->toArray();
-                    })
-                    ->disabled(fn (Get $get): bool => filled($get('usernamesCsv')))
-                    ->live()
-                    ->afterStateUpdated(fn (Set $set) => $set('usernamesCsv', null))
-                    ->helperText('... or search and select users to add.'),
-
-                Forms\Components\Textarea::make('achievementIdsCsv')
-                    ->label('Achievement IDs CSV')
-                    ->placeholder("9, 17, 25 or 9 17 25")
-                    ->helperText("Paste a comma or space-separated list of Achievement IDs.")
-                    ->rows(2)
-                    ->disabled(fn (Get $get): bool => filled($get('achievementIdsSelect')))
-                    ->live(debounce: 200)
-                    ->requiredWithout('achievementIdsSelect')
-                    ->rules(['regex:/^\d+([\s,]+\d+)*$/'])
-                    ->afterStateUpdated(fn (Set $set) => $set('achievementIdsSelect', null)),
-
-                Forms\Components\Select::make('achievementIdsSelect')
-                    ->label('Achievement IDs')
-                    ->placeholder("9, 17, 25 or 9 17 25")
-                    ->helperText("Paste a comma or space-separated list of Achievement IDs.")
-                    ->multiple()
-                    ->searchable()
-                    ->getSearchResultsUsing(function (string $search): array {
-                        return Achievement::with('game')
-                            ->where('title', 'like', "%{$search}%")
-                            ->orWhere('id', 'like', "%{$search}%")
-                            ->limit(50)
-                            ->get()
-                            ->mapWithKeys(function ($achievement) {
-                                return [$achievement->id => "ID: {$achievement->id} - Title: {$achievement->title} - Game: {$achievement->game->title}"];
-                            })
-                            ->toArray();
-                    })
-                    ->getOptionLabelsUsing(function (array $values): array {
-                        return Achievement::with('game')
-                            ->whereIn('id', $values)
-                            ->get()
-                            ->mapWithKeys(function ($achievement) {
-                                return [$achievement->id => "ID: {$achievement->id} - Title: {$achievement->title} - Game: {$achievement->game->title}"];
-                            })
-                            ->toArray();
-                    })
-                    ->disabled(fn (Get $get): bool => filled($get('achievementIdsCsv')))
-                    ->live()
-                    ->requiredWithout('achievementIdsCsv')
-                    ->afterStateUpdated(fn (Set $set) => $set('achievementIdsCsv', null))
-                    ->helperText('... or search and select achievements to add.'),
-
+            ->components([
+                Tabs::make('users')
+                ->label('Users')
+                ->tabs([
+                    Tab::make('Paste Users')
+                        ->icon('heroicon-o-clipboard')
+                        ->schema([
+                            Forms\Components\Textarea::make('usernamesCsv')
+                                ->label('Usernames CSV')
+                                ->placeholder("User1, User2, User3 or User1 User2 User3")
+                                ->helperText("Paste a comma or space-separated list of usernames.")
+                                ->disabled(fn (Get $get): bool => filled($get('usernamesSelect')))
+                                ->live(debounce: 200)
+                                ->rows(2)
+                                ->requiredWithout('usernamesSelect')
+                                ->afterStateUpdated(fn (Set $set) => $set('usernamesSelect', null)),
+                        ]),
+                    Tab::make('Search Users')
+                        ->icon('heroicon-o-magnifying-glass')
+                        ->schema([
+                            Forms\Components\Select::make('usernamesSelect')
+                                ->label('Usernames')
+                                ->requiredWithout('usernamesCsv')
+                                ->multiple()
+                                ->getOptionLabelsUsing(function (array $values): array {
+                                    return User::whereIn('id', $values)->pluck('username', 'id')->toArray();
+                                })
+                                ->searchable()
+                                ->getSearchResultsUsing(function (string $search): array {
+                                    return User::search($search)
+                                        ->withTrashed()
+                                        ->take(50)
+                                        ->get()
+                                        ->pluck('username', 'id')
+                                        ->toArray();
+                                })
+                                ->disabled(fn (Get $get): bool => filled($get('usernamesCsv')))
+                                ->live()
+                                ->afterStateUpdated(fn (Set $set) => $set('usernamesCsv', null))
+                                ->helperText('... or search and select users to add.'),
+                        ]),
+                ]),
+                Tabs::make('achievements')
+                    ->label('Achievements')
+                    ->tabs([
+                        Tab::make('Paste Achievements')
+                            ->icon('heroicon-o-clipboard')
+                            ->schema([
+                                Forms\Components\Textarea::make('achievementIdsCsv')
+                                    ->label('Achievement IDs CSV')
+                                    ->placeholder("9, 17, 25 or 9 17 25")
+                                    ->helperText("Paste a comma or space-separated list of Achievement IDs.")
+                                    ->rows(2)
+                                    ->disabled(fn (Get $get): bool => filled($get('achievementIdsSelect')))
+                                    ->live(debounce: 200)
+                                    ->requiredWithout('achievementIdsSelect')
+                                    ->rules(['regex:/^\d+([\s,]+\d+)*$/'])
+                                    ->afterStateUpdated(fn (Set $set) => $set('achievementIdsSelect', null)),
+                            ]),
+                        Tab::make('Search Achievements')
+                            ->icon('heroicon-o-magnifying-glass')
+                            ->schema([
+                                Forms\Components\Select::make('achievementIdsSelect')
+                                    ->label('Achievement IDs')
+                                    ->placeholder("9, 17, 25 or 9 17 25")
+                                    ->helperText("Paste a comma or space-separated list of Achievement IDs.")
+                                    ->multiple()
+                                    ->searchable()
+                                    ->getSearchResultsUsing(function (string $search): array {
+                                        return Achievement::with('game')
+                                            ->where('title', 'like', "%{$search}%")
+                                            ->orWhere('id', 'like', "%{$search}%")
+                                            ->limit(50)
+                                            ->get()
+                                            ->mapWithKeys(function ($achievement) {
+                                                return [$achievement->id => "ID: {$achievement->id} - Title: {$achievement->title} - Game: {$achievement->game->title}"];
+                                            })
+                                            ->toArray();
+                                    })
+                                    ->getOptionLabelsUsing(function (array $values): array {
+                                        return Achievement::with('game')
+                                            ->whereIn('id', $values)
+                                            ->get()
+                                            ->mapWithKeys(function ($achievement) {
+                                                return [$achievement->id => "ID: {$achievement->id} - Title: {$achievement->title} - Game: {$achievement->game->title}"];
+                                            })
+                                            ->toArray();
+                                    })
+                                    ->disabled(fn (Get $get): bool => filled($get('achievementIdsCsv')))
+                                    ->live()
+                                    ->requiredWithout('achievementIdsCsv')
+                                    ->afterStateUpdated(fn (Set $set) => $set('achievementIdsCsv', null))
+                                    ->helperText('... or search and select achievements to add.'),
+                            ]),
+                    ]),
                 Forms\Components\ToggleButtons::make('mode')
                     ->options([
                         'softcore' => 'Softcore',
@@ -268,7 +283,7 @@ new class extends Component implements HasForms {
                     ->grouped()
                     ->required()
                     ->statePath('selectedMode'),
-        ]);
+            ]);
     }
 }
 
@@ -276,7 +291,7 @@ new class extends Component implements HasForms {
 
 <div>
     <form wire:submit.prevent="submit">
-        <div class="flex flex-col gap-y-4 max-w-[240px]">
+        <div class="flex flex-col gap-y-4">
             {{ $this->form }}
 
             <div class="flex w-full justify-end">
@@ -290,12 +305,7 @@ new class extends Component implements HasForms {
 
         @php
             $achievements = !empty($this->loadedAchievements) ? $this->loadedAchievements : collect();
-            $hasUnpromoted = $achievements->contains(fn($a) => !$a->is_promoted);
             $groupedAchievements = $achievements->groupBy('game_id');
-            $isInvalidHardcore = $this->selectedMode === 'hardcore' && $hasUnpromoted;
-            $hasNoValidData = empty($this->validUserIds) || empty($this->validAchievementIds);
-            $hasMissingData = !empty($this->missingUsernames) || !empty($this->missingAchievementIds);
-            $hasBlockingWarning = $hasNoValidData || $isInvalidHardcore || $hasMissingData;
         @endphp
 
         <div class="mb-6 overflow-x-auto rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10 p-4">

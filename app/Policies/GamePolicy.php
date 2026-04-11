@@ -24,11 +24,9 @@ class GamePolicy
 
             Role::ARTIST,
 
-            // needs to view leaderboards for games
             Role::EVENT_MANAGER,
             Role::PLAYTEST_MANAGER,
 
-            // needs to view achievements for games
             Role::MANUAL_UNLOCKER,
         ]);
     }
@@ -217,8 +215,8 @@ class GamePolicy
             Role::DEVELOPER_JUNIOR,
 
             Role::ARTIST,
-
             Role::EVENT_MANAGER,
+            Role::PLAYTEST_MANAGER,
         ]);
     }
 
@@ -227,6 +225,7 @@ class GamePolicy
         return $user->hasAnyRole([
             Role::DEVELOPER,
             Role::ARTIST,
+            Role::PLAYTEST_MANAGER,
         ]);
     }
 

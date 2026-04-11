@@ -41,8 +41,8 @@ class AchievementPolicy
             Role::WRITER,
 
             /*
-             * unlockers can view achievement logic as part of their review
-             */
+            * unlockers can view achievement logic as part of their review
+            */
             Role::MANUAL_UNLOCKER,
         ]);
     }
@@ -182,6 +182,19 @@ class AchievementPolicy
 
         if ($user->hasRole(Role::EVENT_MANAGER) && isset($achievement)) {
             if ($achievement->game->system_id === System::Events) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function quickEdit(User $user, ?Achievement $achievement): bool
+    {
+        $fields = ['title', 'description', 'type', 'points', 'is_promoted'];
+
+        foreach ($fields as $field) {
+            if ($this->updateField($user, $achievement, $field)) {
                 return true;
             }
         }
