@@ -209,7 +209,7 @@ const Contact: AppPage = () => {
                 <h2 className="text-h4">{t('Unlock Team')}</h2>
                 <p>
                   <Trans
-                    i18nKey="<1>Send a message to Unlock Team</1> for manual unlock requests to achievements you should have unlocked."
+                    i18nKey="<1>Send a message to UnlockTeam</1> for manual unlock requests to achievements you should have unlocked."
                     components={{
                       1: (
                         <InertiaLink href={route('message-thread.create', { to: 'UnlockTeam' })} />
