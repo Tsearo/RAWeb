@@ -85,11 +85,21 @@ function _createTicket(User $user, int $achievementId, int $reportType, ?int $ha
         ->latest()
         ->first();
     if ($latestSession?->user_agent) {
-        [$clientSupportLevel, $coreRestriction] = (new UserAgentService())
+        $userAgentService = new UserAgentService();
+
+        [$clientSupportLevel, $coreRestriction] = $userAgentService
             ->getSupportLevelAndCoreRestriction($latestSession->user_agent);
 
         if ($coreRestriction || $clientSupportLevel === ClientSupportLevel::SoftcoreOnly) {
             $newTicket->state = TicketState::Quarantined;
+        }
+
+        // Quarantine a ticket when it's filed from an emulator that lacks developer toolkit support.
+        if ($newTicket->state !== TicketState::Quarantined) {
+            $emulator = $userAgentService->getEmulatorUserAgent($latestSession->user_agent)?->emulator;
+            if ($emulator && !$emulator->can_debug_triggers) {
+                $newTicket->state = TicketState::Quarantined;
+            }
         }
     }
 
